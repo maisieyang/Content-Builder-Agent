@@ -209,6 +209,19 @@ async function main() {
     web_search: webSearchTool,
   };
 
+  // Helper to create LLM for subagents
+  const createSubagentLLM = (modelName?: string) => {
+    return new ChatOpenAI({
+      model: modelName || process.env.DEFAULT_LLM_MODEL || "qwen-max",
+      apiKey: process.env.DASHSCOPE_API_KEY,
+      configuration: {
+        baseURL:
+          process.env.DASHSCOPE_BASE_URL ||
+          "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      },
+    });
+  };
+
   const subagents = Object.entries(subagentConfig).map(([name, spec]) => {
     const s = spec as {
       description: string;
@@ -220,7 +233,7 @@ async function main() {
       name,
       description: s.description,
       systemPrompt: s.system_prompt,
-      model: s.model,
+      model: s.model ? createSubagentLLM(s.model) : undefined,
       tools: s.tools
         ?.map((t) => availableTools[t])
         .filter((t): t is typeof webSearchTool => t !== undefined),
@@ -250,12 +263,14 @@ async function main() {
   };
 
   try {
+    console.log("🚀 Starting agent...");
     let result = await agent.invoke(
       {
         messages: [{ role: "user", content: task }],
       },
       config
     );
+    console.log("📨 Agent returned result");
 
     // HITL loop
     while (result.__interrupt__ && result.__interrupt__.length > 0) {
