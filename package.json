@@ -13,6 +13,10 @@
     "format": "prettier --write 'src/**/*.ts'",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "tsx src/test-e2e.ts",
+    "test:e2e:blog": "tsx src/test-e2e.ts --scenario=blog --verbose",
+    "test:e2e:linkedin": "tsx src/test-e2e.ts --scenario=linkedin --verbose",
+    "test:e2e:twitter": "tsx src/test-e2e.ts --scenario=twitter --verbose",
     "langgraph:dev": "npx @langchain/langgraph-cli dev"
   },
   "dependencies": {

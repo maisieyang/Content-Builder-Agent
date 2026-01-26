@@ -177,7 +177,19 @@ async function main() {
 
   // Import the agent creation function and recreate with checkpointer
   const { createDeepAgent, FilesystemBackend } = await import("deepagents");
+  const { ChatOpenAI } = await import("@langchain/openai");
   const { resolve } = await import("path");
+
+  // Create LLM configured for DashScope (Qwen)
+  const llm = new ChatOpenAI({
+    model: process.env.DEFAULT_LLM_MODEL || "qwen-max",
+    apiKey: process.env.DASHSCOPE_API_KEY,
+    configuration: {
+      baseURL:
+        process.env.DASHSCOPE_BASE_URL ||
+        "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    },
+  });
 
   // Tools
   const { webSearchTool } = await import("./tools/web-search.js");
@@ -216,6 +228,7 @@ async function main() {
   });
 
   const agent = createDeepAgent({
+    model: llm,
     memory: ["./AGENTS.md"],
     skills: ["./skills/"],
     tools: [webSearchTool, generateImageTool, extractContentTool, publishPostTool],

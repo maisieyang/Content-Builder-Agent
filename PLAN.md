@@ -230,16 +230,16 @@ content-builder-agent/
 - [x] 实现审核响应处理（accept/edit/ignore）
 - [x] 测试完整审核流程
 
-### Phase 6: 测试和优化
+### Phase 6: 测试和优化 ✅
 
 **目标**：验证端到端流程
 
 **任务**：
-- [ ] 测试：主题 → 博客文章
-- [ ] 测试：URL → LinkedIn 帖子
-- [ ] 测试：URL → Twitter thread
-- [ ] 测试：人工审核 → 发布
-- [ ] 优化提示词和工作流
+- [x] 测试：主题 → 博客文章
+- [x] 测试：URL → LinkedIn 帖子
+- [x] 测试：URL → Twitter thread
+- [x] 测试：人工审核 → 发布
+- [x] 优化提示词和工作流
 
 ---
 
