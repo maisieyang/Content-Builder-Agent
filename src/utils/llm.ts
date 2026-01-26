@@ -1,5 +1,3 @@
-import { ChatOpenAI } from "@langchain/openai";
-
 /**
  * LLM factory for Content Builder Agent.
  *
@@ -11,14 +9,16 @@ import { ChatOpenAI } from "@langchain/openai";
  *
  * Optional env:
  * - DASHSCOPE_BASE_URL (defaults to DashScope compatible-mode)
- * - DEFAULT_LLM_MODEL (defaults to "qwen3-max")
+ * - DEFAULT_LLM_MODEL (defaults to "qwen-max")
  */
+
+import { ChatOpenAI } from "@langchain/openai";
 
 const DEFAULT_DASHSCOPE_BASE_URL =
   process.env.DASHSCOPE_BASE_URL ??
   "https://dashscope.aliyuncs.com/compatible-mode/v1";
 
-const DEFAULT_LLM_MODEL = process.env.DEFAULT_LLM_MODEL ?? "qwen3-max";
+const DEFAULT_LLM_MODEL = process.env.DEFAULT_LLM_MODEL ?? "qwen-max";
 
 function requireDashScopeApiKey(): string {
   const key = process.env.DASHSCOPE_API_KEY;
@@ -40,9 +40,6 @@ export interface LLMOverrides {
 
 /**
  * Create a ChatOpenAI model configured for DashScope (Qwen).
- *
- * @param overrides - Optional ChatOpenAI constructor fields (temperature, streaming, etc.)
- * @returns Configured ChatOpenAI instance
  */
 export function getDefaultChatModel(overrides: LLMOverrides = {}): ChatOpenAI {
   return new ChatOpenAI({
