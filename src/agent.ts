@@ -61,8 +61,10 @@ function loadSubagents(configPath: string): SubAgent[] {
 
 /**
  * Create the Content Builder Agent
+ *
+ * @returns A DeepAgent configured for content creation tasks
  */
-export function createContentBuilderAgent() {
+export function createContentBuilderAgent(): ReturnType<typeof createDeepAgent> {
   return createDeepAgent({
     // Memory: brand voice and writing standards
     memory: ["./AGENTS.md"],
@@ -95,4 +97,5 @@ export function createContentBuilderAgent() {
 }
 
 // Export the agent instance for langgraph.json
-export const agent = createContentBuilderAgent();
+export const agent: ReturnType<typeof createDeepAgent> =
+  createContentBuilderAgent();

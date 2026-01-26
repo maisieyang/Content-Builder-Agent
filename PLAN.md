@@ -203,14 +203,14 @@ content-builder-agent/
 - [ ] 复制并改造 upload-post → publish-post 工具
 - [ ] 复制 llm.ts、types.ts、工具函数
 
-### Phase 3: 实现自定义工具
+### Phase 3: 实现自定义工具 ✅
 
 **目标**：补充新能力
 
 **任务**：
-- [ ] 实现 web-search.ts（Tavily）
-- [ ] 实现 generate-image.ts（通义万象）
-- [ ] 集成工具到 agent.ts
+- [x] 实现 web-search.ts（Tavily）
+- [x] 实现 generate-image.ts（通义万象）
+- [x] 集成工具到 agent.ts
 
 ### Phase 4: 完善 Skills 和 Subagents
 
