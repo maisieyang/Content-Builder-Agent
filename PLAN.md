@@ -212,14 +212,14 @@ content-builder-agent/
 - [x] 实现 generate-image.ts（通义万象）
 - [x] 集成工具到 agent.ts
 
-### Phase 4: 完善 Skills 和 Subagents
+### Phase 4: 完善 Skills 和 Subagents ✅
 
 **目标**：定义完整的工作流
 
 **任务**：
-- [ ] 完善 blog-post/SKILL.md（研究 → 写作 → 配图流程）
-- [ ] 完善 social-media/SKILL.md（LinkedIn/Twitter 格式指南）
-- [ ] 配置 researcher 子代理（系统提示、工具）
+- [x] 完善 blog-post/SKILL.md（研究 → 写作 → 配图流程）
+- [x] 完善 social-media/SKILL.md（LinkedIn/Twitter 格式指南）
+- [x] 配置 researcher 子代理（系统提示、工具）
 
 ### Phase 5: Human-in-the-loop 集成
 
