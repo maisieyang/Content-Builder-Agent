@@ -221,14 +221,14 @@ content-builder-agent/
 - [x] 完善 social-media/SKILL.md（LinkedIn/Twitter 格式指南）
 - [x] 配置 researcher 子代理（系统提示、工具）
 
-### Phase 5: Human-in-the-loop 集成
+### Phase 5: Human-in-the-loop 集成 ✅
 
 **目标**：添加人工审核
 
 **任务**：
-- [ ] 配置 interruptOn（在内容生成后中断）
-- [ ] 实现审核响应处理（accept/edit/ignore）
-- [ ] 测试完整审核流程
+- [x] 配置 interruptOn（在内容生成后中断）
+- [x] 实现审核响应处理（accept/edit/ignore）
+- [x] 测试完整审核流程
 
 ### Phase 6: 测试和优化
 
