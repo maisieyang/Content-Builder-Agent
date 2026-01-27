@@ -1,142 +1,58 @@
 ---
 name: blog-post
-description: Use this skill when writing long-form blog posts, tutorials, or educational articles that require structure, depth, and SEO considerations
+description: Use this skill when writing blog posts, tutorials, or articles
 ---
 
-# Blog Post Writing Skill
+# Blog Post Writing
 
-This skill provides a structured workflow for creating high-quality blog posts that educate and engage readers.
+This skill helps you create engaging blog posts that share your ideas with readers.
 
-## When to Use This Skill
+## When to Use
 
-Use this skill when asked to:
-- Write a blog post or article
-- Create a tutorial or how-to guide
-- Develop educational long-form content
-- Write thought leadership pieces
+- Writing a blog post or article
+- Creating a tutorial or how-to guide
+- Developing thought leadership content
 
-## Research First (Required)
+## Your Approach
 
-**Before writing any blog post, you MUST delegate research:**
+Feel free to explore the topic in your own way. Here are some ideas:
 
-1. Use the `task` tool with `subagent_type: "researcher"`
-2. In the description, specify BOTH the topic AND where to save:
+### Research (Optional)
+If you need more context, use the `researcher` subagent or `web_search` to gather information. Save findings to `research/<slug>.md` if useful for future reference.
+
+### Writing Structure
+A typical blog post might include:
+- **Hook**: Start with something that grabs attention
+- **Context**: Why does this matter?
+- **Main content**: Break into sections with clear headers
+- **Conclusion**: What should the reader take away?
+
+But feel free to experiment with different structures.
+
+### Cover Image (Optional)
+If you want to create a visual, use `generate_image`:
 
 ```
-task(
-    subagent_type="researcher",
-    description="Research [TOPIC]. Save findings to research/[slug].md"
+generate_image(
+  prompt="Describe the image you envision...",
+  outputPath="blogs/<slug>/hero.png"
 )
 ```
 
-Example:
-```
-task(
-    subagent_type="researcher",
-    description="Research the current state of AI agents in 2025. Save findings to research/ai-agents-2025.md"
-)
-```
+**Tips for image prompts:**
+- Be specific about subject, style, and colors
+- Consider the mood you want to convey
+- Leave space for text overlay if needed
 
-3. After research completes, read the findings file before writing
+## Output
 
-## Output Structure (Required)
+Save your blog post to `blogs/<slug>/post.md`
 
-**Every blog post MUST have both a post AND a cover image:**
+Example: A post about "AI Agents" → `blogs/ai-agents/post.md`
 
-```
-blogs/
-└── <slug>/
-    ├── post.md        # The blog post content
-    └── hero.png       # REQUIRED: Generated cover image
-```
+## Writing Tips
 
-Example: A post about "AI Agents in 2025" → `blogs/ai-agents-2025/`
-
-**You MUST complete both steps:**
-1. Write the post to `blogs/<slug>/post.md`
-2. Generate a cover image using `generate_image` and save to `blogs/<slug>/hero.png`
-
-**A blog post is NOT complete without its cover image.**
-
-## Blog Post Structure
-
-Every blog post should follow this structure:
-
-### 1. Hook (Opening)
-- Start with a compelling question, statistic, or statement
-- Make the reader want to continue
-- Keep it to 2-3 sentences
-
-### 2. Context (The Problem)
-- Explain why this topic matters
-- Describe the problem or opportunity
-- Connect to the reader's experience
-
-### 3. Main Content (The Solution)
-- Break into 3-5 main sections with H2 headers
-- Each section covers one key point
-- Include code examples, diagrams, or screenshots where helpful
-- Use bullet points for lists
-
-### 4. Practical Application
-- Show how to apply the concepts
-- Include step-by-step instructions if applicable
-- Provide code snippets or templates
-
-### 5. Conclusion & CTA
-- Summarize key takeaways (3 bullets max)
-- End with a clear call-to-action
-- Link to related resources
-
-## Cover Image Generation
-
-After writing the post, generate a cover image using the `generate_image` tool:
-
-```
-generate_image(prompt="A detailed description of the image...", output_path="blogs/<slug>/hero.png")
-```
-
-### Writing Effective Image Prompts
-
-Structure your prompt with these elements:
-
-1. **Subject**: What is the main focus? Be specific and concrete.
-2. **Style**: Art direction (minimalist, isometric, flat design, 3D render, watercolor, etc.)
-3. **Composition**: How elements are arranged (centered, rule of thirds, symmetrical)
-4. **Color palette**: Specific colors or mood (warm earth tones, cool blues and purples, high contrast)
-5. **Lighting/Atmosphere**: Soft diffused light, dramatic shadows, golden hour, neon glow
-6. **Technical details**: Aspect ratio considerations, negative space for text overlay
-
-### Example Prompts
-
-**For a technical blog post:**
-```
-Isometric 3D illustration of interconnected glowing cubes representing AI agents, each cube has subtle circuit patterns. Cubes connected by luminous data streams. Deep navy background (#0a192f) with electric blue (#64ffda) and soft purple (#c792ea) accents. Clean minimal style, lots of negative space at top for title. Professional tech aesthetic.
-```
-
-**For a tutorial/how-to:**
-```
-Clean flat illustration of hands typing on a keyboard with abstract code symbols floating upward, transforming into lightbulbs and gears. Warm gradient background from soft coral to light peach. Friendly, approachable style. Centered composition with space for text overlay.
-```
-
-**For thought leadership:**
-```
-Abstract visualization of a human silhouette profile merging with geometric neural network patterns. Split composition - organic watercolor texture on left transitioning to clean vector lines on right. Muted sage green and warm terracotta color scheme. Contemplative, forward-thinking mood.
-```
-
-## SEO Considerations
-
-- Include the main keyword in the title and first paragraph
-- Use the keyword naturally 3-5 times throughout
-- Keep the title under 60 characters
-- Write a meta description (150-160 characters)
-
-## Quality Checklist
-
-Before finishing:
-- [ ] Post saved to `blogs/<slug>/post.md`
-- [ ] Hero image generated at `blogs/<slug>/hero.png`
-- [ ] Hook grabs attention in first 2 sentences
-- [ ] Each section has a clear purpose
-- [ ] Conclusion summarizes key points
-- [ ] CTA tells reader what to do next
+- Use active voice
+- One idea per paragraph
+- Include concrete examples
+- Keep it conversational

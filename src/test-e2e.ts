@@ -12,7 +12,6 @@
  */
 
 import "dotenv/config";
-import { MemorySaver } from "@langchain/langgraph";
 import { createDeepAgent, FilesystemBackend } from "deepagents";
 import { ChatOpenAI } from "@langchain/openai";
 import { resolve } from "path";
@@ -22,7 +21,6 @@ import YAML from "yaml";
 // Tools
 import { webSearchTool } from "./tools/web-search.js";
 import { generateImageTool } from "./tools/generate-image.js";
-import { extractContentTool } from "./tools/extract-content.js";
 import { publishPostTool } from "./tools/publish-post.js";
 
 /**
@@ -56,22 +54,16 @@ const TEST_SCENARIOS = {
     description: "Tests: Topic → Research → Blog Post + Cover Image",
   },
   linkedin: {
-    name: "LinkedIn Post from URL",
-    task: "Create a LinkedIn post based on this article: https://www.anthropic.com/news/claude-4-0-model-card. Focus on the key capabilities.",
+    name: "LinkedIn Post from Topic",
+    task: "Create a LinkedIn post about the future of AI agents and how they will transform software development.",
     expectedOutputs: ["linkedin/"],
-    description: "Tests: URL → Extract Content → LinkedIn Post + Image",
+    description: "Tests: Topic → Research → LinkedIn Post + Image",
   },
   twitter: {
     name: "Twitter Thread from Topic",
     task: "Create a short Twitter thread (3 tweets) about prompt engineering best practices.",
     expectedOutputs: ["tweets/"],
     description: "Tests: Topic → Research → Twitter Thread + Image",
-  },
-  hitl: {
-    name: "HITL Review Flow",
-    task: "Create a LinkedIn post about AI and publish it to LinkedIn.",
-    expectedOutputs: ["linkedin/"],
-    description: "Tests: Content Creation → HITL Review → Publish",
   },
 };
 
@@ -89,7 +81,7 @@ function checkEnvironment(): { valid: boolean; missing: string[] } {
 /**
  * Create agent for testing
  */
-function createTestAgent(checkpointer?: MemorySaver) {
+function createTestAgent() {
   // Load subagents
   const content = readFileSync(resolve(PROJECT_ROOT, "subagents.yaml"), "utf-8");
   const subagentConfig = YAML.parse(content);
@@ -136,16 +128,12 @@ function createTestAgent(checkpointer?: MemorySaver) {
     model: llm,
     memory: ["./AGENTS.md"],
     skills: ["./skills/"],
-    tools: [webSearchTool, generateImageTool, extractContentTool, publishPostTool],
+    tools: [webSearchTool, generateImageTool, publishPostTool],
     subagents,
     backend: new FilesystemBackend({
       rootDir: resolve(PROJECT_ROOT, "output"),
       virtualMode: false,
     }),
-    interruptOn: {
-      publish_post: true,
-    },
-    checkpointer,
   });
 }
 
@@ -154,13 +142,12 @@ function createTestAgent(checkpointer?: MemorySaver) {
  */
 async function runScenario(
   scenarioKey: ScenarioKey,
-  options: { verbose?: boolean; skipPublish?: boolean } = {}
+  options: { verbose?: boolean } = {}
 ): Promise<{
   success: boolean;
   scenario: string;
   duration: number;
   messages: number;
-  interrupted: boolean;
   error?: string;
 }> {
   const scenario = TEST_SCENARIOS[scenarioKey];
@@ -171,13 +158,10 @@ async function runScenario(
   console.log(`   ${scenario.description}`);
   console.log(`${"=".repeat(60)}\n`);
 
-  const checkpointer = new MemorySaver();
-  const agent = createTestAgent(checkpointer);
-  const threadId = `test-${scenarioKey}-${Date.now()}`;
+  const agent = createTestAgent();
 
   const config = {
-    configurable: { thread_id: threadId },
-    recursionLimit: 50, // Lower for testing
+    recursionLimit: 50,
   };
 
   try {
@@ -188,14 +172,12 @@ async function runScenario(
       config
     );
 
-    const interrupted = !!(result.__interrupt__ && result.__interrupt__.length > 0);
     const duration = Date.now() - startTime;
 
     if (options.verbose) {
       console.log(`\n📊 Results:`);
       console.log(`   Messages: ${result.messages.length}`);
       console.log(`   Duration: ${(duration / 1000).toFixed(1)}s`);
-      console.log(`   Interrupted (HITL): ${interrupted}`);
 
       // Show last AI message
       const lastAI = result.messages
@@ -231,7 +213,6 @@ async function runScenario(
       scenario: scenario.name,
       duration,
       messages: result.messages.length,
-      interrupted,
     };
   } catch (error) {
     const duration = Date.now() - startTime;
@@ -245,7 +226,6 @@ async function runScenario(
       scenario: scenario.name,
       duration,
       messages: 0,
-      interrupted: false,
       error: errorMessage,
     };
   }

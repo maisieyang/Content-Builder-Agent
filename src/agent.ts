@@ -5,7 +5,9 @@
  * with cover images included. Powered by deepagents framework.
  */
 
+import "dotenv/config";
 import { createDeepAgent, FilesystemBackend, type SubAgent } from "deepagents";
+import { ChatOpenAI } from "@langchain/openai";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import YAML from "yaml";
@@ -13,11 +15,25 @@ import YAML from "yaml";
 // Tools
 import { webSearchTool } from "./tools/web-search.js";
 import { generateImageTool } from "./tools/generate-image.js";
-import { extractContentTool } from "./tools/extract-content.js";
 import { publishPostTool } from "./tools/publish-post.js";
 
 // Get project root directory
 const PROJECT_ROOT = resolve(import.meta.dirname, "..");
+
+/**
+ * Create LLM configured for DashScope (Qwen)
+ */
+function createDashScopeLLM(modelName?: string) {
+  return new ChatOpenAI({
+    model: modelName || process.env.DEFAULT_LLM_MODEL || "qwen-max",
+    apiKey: process.env.DASHSCOPE_API_KEY,
+    configuration: {
+      baseURL:
+        process.env.DASHSCOPE_BASE_URL ||
+        "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    },
+  });
+}
 
 /**
  * Load subagent definitions from YAML and wire up tools
@@ -45,8 +61,9 @@ function loadSubagents(configPath: string): SubAgent[] {
       systemPrompt: s.system_prompt,
     };
 
+    // Create LLM instance for subagent if model specified
     if (s.model) {
-      subagent.model = s.model;
+      subagent.model = createDashScopeLLM(s.model);
     }
 
     if (s.tools) {
@@ -65,7 +82,13 @@ function loadSubagents(configPath: string): SubAgent[] {
  * @returns A DeepAgent configured for content creation tasks
  */
 export function createContentBuilderAgent(): ReturnType<typeof createDeepAgent> {
+  // Create main LLM
+  const llm = createDashScopeLLM();
+
   return createDeepAgent({
+    // LLM model
+    model: llm,
+
     // Memory: brand voice and writing standards
     memory: ["./AGENTS.md"],
 
@@ -76,7 +99,6 @@ export function createContentBuilderAgent(): ReturnType<typeof createDeepAgent> 
     tools: [
       webSearchTool,
       generateImageTool,
-      extractContentTool,
       publishPostTool,
     ],
 
@@ -89,10 +111,6 @@ export function createContentBuilderAgent(): ReturnType<typeof createDeepAgent> 
       virtualMode: true,
     }),
 
-    // Human-in-the-loop: interrupt before publishing
-    interruptOn: {
-      publish_post: true,
-    },
   });
 }
 

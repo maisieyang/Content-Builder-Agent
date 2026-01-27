@@ -6,5 +6,4 @@
 
 export { webSearchTool } from "./web-search.js";
 export { generateImageTool } from "./generate-image.js";
-export { extractContentTool } from "./extract-content.js";
 export { publishPostTool } from "./publish-post.js";
