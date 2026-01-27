@@ -15,6 +15,7 @@ import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { writeFileSync, mkdirSync } from "fs";
 import { dirname, resolve } from "path";
+import { requireEnv } from "../utils/index.js";
 
 const DASHSCOPE_API_BASE = "https://dashscope.aliyuncs.com/api/v1";
 const DEFAULT_MODEL = "wanx2.1-t2i-turbo"; // Fast model for image generation
@@ -22,16 +23,6 @@ const DEFAULT_MODEL = "wanx2.1-t2i-turbo"; // Fast model for image generation
 // Polling configuration
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLL_ATTEMPTS = 60; // 2 minutes max wait
-
-function requireDashScopeApiKey(): string {
-  const key = process.env.DASHSCOPE_API_KEY;
-  if (!key) {
-    throw new Error(
-      "Missing DASHSCOPE_API_KEY. Set it in your environment (.env) to use image generation."
-    );
-  }
-  return key;
-}
 
 interface TaskResponse {
   request_id: string;
@@ -52,7 +43,7 @@ async function createImageTask(
   prompt: string,
   model: string = DEFAULT_MODEL
 ): Promise<string> {
-  const apiKey = requireDashScopeApiKey();
+  const apiKey = requireEnv("DASHSCOPE_API_KEY", "image generation");
 
   const response = await fetch(
     `${DASHSCOPE_API_BASE}/services/aigc/text2image/image-synthesis`,
@@ -89,7 +80,7 @@ async function createImageTask(
  * Poll task status until completion
  */
 async function pollTaskStatus(taskId: string): Promise<string> {
-  const apiKey = requireDashScopeApiKey();
+  const apiKey = requireEnv("DASHSCOPE_API_KEY", "image generation");
 
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
     const response = await fetch(

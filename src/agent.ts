@@ -6,16 +6,20 @@
  */
 
 import "dotenv/config";
-import { createDeepAgent, FilesystemBackend, type SubAgent } from "deepagents";
+import { createDeepAgent, FilesystemBackend } from "deepagents";
 import { ChatOpenAI } from "@langchain/openai";
-import { readFileSync } from "fs";
 import { resolve } from "path";
-import YAML from "yaml";
 
 // Tools
 import { webSearchTool } from "./tools/web-search.js";
 import { generateImageTool } from "./tools/generate-image.js";
 import { publishPostTool } from "./tools/publish-post.js";
+
+// SubAgents
+import { researcherSubAgent, editorSubAgent } from "./subagents/index.js";
+
+// Utils
+import { requireEnv, getEnv } from "./utils/index.js";
 
 // Get project root directory
 const PROJECT_ROOT = resolve(import.meta.dirname, "..");
@@ -24,56 +28,18 @@ const PROJECT_ROOT = resolve(import.meta.dirname, "..");
  * Create LLM configured for DashScope (Qwen)
  */
 function createDashScopeLLM(modelName?: string) {
+  const apiKey = requireEnv("DASHSCOPE_API_KEY", "LLM API calls");
+
   return new ChatOpenAI({
-    model: modelName || process.env.DEFAULT_LLM_MODEL || "qwen-max",
-    apiKey: process.env.DASHSCOPE_API_KEY,
+    model: modelName || getEnv("DEFAULT_LLM_MODEL", "qwen-max"),
+    apiKey,
     configuration: {
-      baseURL:
-        process.env.DASHSCOPE_BASE_URL ||
-        "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      baseURL: getEnv(
+        "DASHSCOPE_BASE_URL",
+        "https://dashscope.aliyuncs.com/compatible-mode/v1"
+      ),
     },
   });
-}
-
-/**
- * Load subagent definitions from YAML and wire up tools
- */
-function loadSubagents(configPath: string): SubAgent[] {
-  const availableTools: Record<string, unknown> = {
-    web_search: webSearchTool,
-  };
-
-  const content = readFileSync(resolve(PROJECT_ROOT, configPath), "utf-8");
-  const config = YAML.parse(content);
-
-  const subagents: SubAgent[] = [];
-  for (const [name, spec] of Object.entries(config)) {
-    const s = spec as {
-      description: string;
-      system_prompt: string;
-      model?: string;
-      tools?: string[];
-    };
-
-    const subagent: SubAgent = {
-      name,
-      description: s.description,
-      systemPrompt: s.system_prompt,
-    };
-
-    // Create LLM instance for subagent if model specified
-    if (s.model) {
-      subagent.model = createDashScopeLLM(s.model);
-    }
-
-    if (s.tools) {
-      subagent.tools = s.tools.map((t) => availableTools[t] as never);
-    }
-
-    subagents.push(subagent);
-  }
-
-  return subagents;
 }
 
 /**
@@ -96,14 +62,10 @@ export function createContentBuilderAgent(): ReturnType<typeof createDeepAgent> 
     skills: ["./skills/"],
 
     // Tools available to the agent
-    tools: [
-      webSearchTool,
-      generateImageTool,
-      publishPostTool,
-    ],
+    tools: [webSearchTool, generateImageTool, publishPostTool],
 
-    // Subagents for delegated tasks
-    subagents: loadSubagents("subagents.yaml"),
+    // Subagents for delegated tasks (type-safe TypeScript definitions)
+    subagents: [researcherSubAgent, editorSubAgent],
 
     // Filesystem backend for saving outputs
     backend: new FilesystemBackend({
@@ -111,6 +73,10 @@ export function createContentBuilderAgent(): ReturnType<typeof createDeepAgent> 
       virtualMode: true,
     }),
 
+    // Human-in-the-loop: interrupt before publishing
+    interruptOn: {
+      publish_post: true,
+    },
   });
 }
 

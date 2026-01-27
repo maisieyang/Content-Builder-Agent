@@ -10,16 +10,10 @@
 import { tool } from "@langchain/core/tools";
 import { TavilySearch } from "@langchain/tavily";
 import { z } from "zod";
-
-// Lazily initialized Tavily search instance
-let tavilySearch: TavilySearch | null = null;
+import { requireEnv } from "../utils/index.js";
 
 function getTavilySearch(maxResults: number): TavilySearch {
-  if (!process.env.TAVILY_API_KEY) {
-    throw new Error(
-      "Missing TAVILY_API_KEY. Set it in your environment (.env) to use web search."
-    );
-  }
+  requireEnv("TAVILY_API_KEY", "web search");
 
   // Create new instance with specified maxResults
   return new TavilySearch({

@@ -272,3 +272,16 @@ export async function processImageInput(
 
 // Re-export types
 export type { Image, UrlType, PageContent, ExtractedContent } from "./types.js";
+
+// Re-export environment utilities
+export {
+  requireEnv,
+  getEnv,
+  validateRequiredEnv,
+  isWebSearchAvailable,
+  isTwitterAvailable,
+  isLinkedInAvailable,
+  isImageGenerationAvailable,
+  getAvailableFeatures,
+  logFeatureAvailability,
+} from "./env.js";
