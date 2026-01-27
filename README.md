@@ -1,16 +1,27 @@
 # Content Builder Agent
 
-A content writing agent for creating blog posts, LinkedIn posts, and tweets with cover images included. Powered by [deepagents](https://github.com/langchain-ai/deepagentsjs) framework.
+A creative content writing agent for individual creators. Generates blog posts, LinkedIn posts, and Twitter threads with AI-powered research, writing, and image generation.
+
+Built with [deepagents](https://github.com/anthropics/deepagentsjs) framework.
+
+## Philosophy
+
+This agent is designed to **amplify creators' ideas**, not replace them. It embraces:
+
+- **Creative autonomy** - No approval gates interrupting the flow
+- **Iterative refinement** - Research → Draft → Review → Revise cycles
+- **Platform-native content** - Optimized for each platform's format and tone
 
 ## Features
 
-- **Multi-input support**: Topic descriptions, URL links, or local files
-- **Multi-output formats**: Blog posts, LinkedIn posts, Twitter threads
-- **AI image generation**: Cover images via Tongyi Wanxiang
-- **Research capability**: Web search via Tavily
-- **Human-in-the-loop**: Review before publishing
-- **Memory system**: Brand voice via AGENTS.md
-- **Skills-based workflows**: Specialized workflows for each content type
+| Feature | Description |
+|---------|-------------|
+| **Multi-format output** | Blog posts, LinkedIn posts, Twitter threads |
+| **Research capability** | Web search via Tavily for current information |
+| **Content review** | Built-in editor subagent for quality feedback |
+| **AI image generation** | Cover images via Tongyi Wanxiang |
+| **Skills-based workflows** | Detailed guides for each content type |
+| **Brand memory** | Consistent voice via AGENTS.md |
 
 ## Quick Start
 
@@ -18,11 +29,11 @@ A content writing agent for creating blog posts, LinkedIn posts, and tweets with
 # Install dependencies
 npm install
 
-# Copy environment template
+# Configure environment
 cp .env.example .env
-# Edit .env with your API keys
+# Edit .env with your API keys (see Environment Variables below)
 
-# Run with a task
+# Run the agent
 npm run dev "Write a blog post about AI agents"
 npm run dev "Create a LinkedIn post about prompt engineering"
 
@@ -30,96 +41,138 @@ npm run dev "Create a LinkedIn post about prompt engineering"
 npm run langgraph:dev
 ```
 
-## Architecture
+## Project Structure
 
 ```
 content-builder-agent/
-├── AGENTS.md                    # Memory: Brand voice & writing standards
-├── subagents.yaml               # Subagent definitions (researcher)
+├── AGENTS.md                    # Brand voice & creative philosophy
 ├── skills/
-│   ├── blog-post/SKILL.md       # Blog writing workflow
-│   └── social-media/SKILL.md    # Social media workflow
+│   ├── blog-post/SKILL.md       # 7-step blog writing workflow
+│   └── social-media/SKILL.md    # LinkedIn & Twitter guides
 ├── src/
-│   ├── agent.ts                 # Main entry: createDeepAgent
+│   ├── agent.ts                 # Main agent configuration
+│   ├── subagents/
+│   │   ├── researcher.ts        # Web research specialist
+│   │   └── editor.ts            # Content review & feedback
 │   ├── tools/
-│   │   ├── web-search.ts        # Tavily search
-│   │   ├── generate-image.ts    # Tongyi Wanxiang
-│   │   ├── extract-content.ts   # URL content extraction
+│   │   ├── web-search.ts        # Tavily integration
+│   │   ├── generate-image.ts    # Tongyi Wanxiang integration
 │   │   └── publish-post.ts      # Social media publishing
-│   └── index.ts                 # CLI entry point
+│   └── utils/
+│       └── env.ts               # Environment validation
 ├── output/                      # Generated content
-│   ├── blogs/
-│   ├── linkedin/
-│   ├── tweets/
-│   └── research/
 └── langgraph.json               # LangGraph configuration
 ```
 
 ## How It Works
 
-The agent is configured by files on disk, not code:
+### Configuration Files
 
-| File | Purpose | When Loaded |
-|------|---------|-------------|
-| `AGENTS.md` | Brand voice, tone, writing standards | Always (system prompt) |
-| `subagents.yaml` | Research and other delegated tasks | Always (defines `task` tool) |
-| `skills/*/SKILL.md` | Content-specific workflows | On demand |
+| File | Purpose |
+|------|---------|
+| `AGENTS.md` | Brand voice, tone, creative philosophy (loaded into system prompt) |
+| `skills/*/SKILL.md` | Content-specific workflows with templates and checklists |
+| `src/subagents/*.ts` | Specialized agents for research and editing |
 
-**Flow:**
-1. Agent receives task → identifies input type (topic/URL/file)
-2. If topic: delegates research to `researcher` subagent
-3. If URL: extracts content using `extract_content` tool
-4. Loads relevant skill (blog-post or social-media)
-5. Writes content following skill workflow
-6. Generates cover image with Tongyi Wanxiang
-7. Human review (interrupt)
-8. Optional: publish to platform
+### Content Creation Flow
 
-## Output
+```
+User Request
+     │
+     ▼
+┌─────────────────┐
+│  Main Agent     │ ← AGENTS.md (brand voice)
+│  (Orchestrator) │ ← Skills (workflows)
+└────────┬────────┘
+         │
+    ┌────┴────┐
+    ▼         ▼
+┌────────┐  ┌────────┐
+│Researcher│  │ Editor │
+│(research)│  │(review)│
+└────────┘  └────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Final Content  │
+│  + Cover Image  │
+└─────────────────┘
+```
+
+### SubAgents
+
+| SubAgent | Role | Tools |
+|----------|------|-------|
+| `researcher` | Gathers information, statistics, and sources | `web_search` |
+| `editor` | Reviews content, provides actionable feedback | `read_file` |
+
+### Available Tools
+
+| Tool | Description |
+|------|-------------|
+| `web_search` | Search the web via Tavily |
+| `generate_image` | Create images via Tongyi Wanxiang |
+| `publish_post` | Publish to Twitter or LinkedIn |
+| `write_file` | Save content to filesystem (built-in) |
+| `read_file` | Read files (built-in) |
+
+## Output Structure
 
 ```
 output/
 ├── blogs/
-│   └── ai-agents/
-│       ├── post.md       # Blog content
-│       └── hero.png      # Generated cover image
+│   └── <slug>/
+│       ├── post.md          # Final blog post
+│       └── hero.png         # Cover image
 ├── linkedin/
-│   └── prompt-engineering/
-│       ├── post.md       # Post content
-│       └── image.png     # Generated image
+│   └── <slug>/
+│       ├── post.md          # LinkedIn post
+│       └── image.png        # Social image
 ├── tweets/
-│   └── future-of-coding/
-│       ├── thread.md     # Thread content
-│       └── image.png     # Generated image
+│   └── <slug>/
+│       ├── thread.md        # Twitter thread
+│       └── image.png        # Social image
 └── research/
-    └── ai-agents.md      # Research notes
+    └── <slug>.md            # Research notes
 ```
 
 ## Environment Variables
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `DASHSCOPE_API_KEY` | Yes | LLM + Image generation |
-| `TAVILY_API_KEY` | Yes | Web search |
-| `LANGSMITH_API_KEY` | No | Observability |
-| `FIRECRAWL_API_KEY` | No | Content extraction |
-| `TWITTER_*` | No | Twitter publishing |
-| `LINKEDIN_*` | No | LinkedIn publishing |
+| `DASHSCOPE_API_KEY` | **Yes** | LLM (Qwen) + Image generation |
+| `TAVILY_API_KEY` | For search | Web search capability |
+| `TWITTER_API_KEY` | For publishing | Twitter API credentials |
+| `TWITTER_API_SECRET` | For publishing | |
+| `TWITTER_ACCESS_TOKEN` | For publishing | |
+| `TWITTER_ACCESS_SECRET` | For publishing | |
+| `LINKEDIN_ACCESS_TOKEN` | For publishing | LinkedIn API token |
+| `LANGSMITH_API_KEY` | Optional | LangSmith observability |
 
 ## Development
 
 ```bash
-# Build
+# Build TypeScript
 npm run build
 
 # Run tests
 npm test
 
+# Run E2E tests
+npm run test:e2e
+
 # Lint
 npm run lint
+npm run lint:fix
+
+# Format
+npm run format
 ```
+
+## Architecture Deep Dive
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed architecture documentation.
 
 ## Related
 
-- [deepagentsjs](https://github.com/langchain-ai/deepagentsjs) - The underlying framework
-- [social-media-agent-from-scratch](../social-media-agent-from-scratch) - Original social media agent (code reused)
+- [deepagentsjs](https://github.com/anthropics/deepagentsjs) - The underlying agent framework
