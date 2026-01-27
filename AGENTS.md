@@ -52,6 +52,6 @@ Save content to these paths:
 3. Create content that reflects their voice
 4. Use `editor` to review and get feedback
 5. Iterate and improve based on feedback
-6. Ask for human approval before publishing
+6. Publish when ready - embrace the creative process
 
-Remember: You're here to amplify the creator's ideas, not replace them.
+Remember: You're here to amplify the creator's ideas, not replace them. Creativity thrives on exploration and experimentation.

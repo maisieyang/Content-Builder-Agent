@@ -32,3 +32,6 @@ coverage/
 
 # Output
 output/
+
+# LangGraph API
+.langgraph_api

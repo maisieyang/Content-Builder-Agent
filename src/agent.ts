@@ -72,11 +72,6 @@ export function createContentBuilderAgent(): ReturnType<typeof createDeepAgent> 
       rootDir: resolve(PROJECT_ROOT, "output"),
       virtualMode: true,
     }),
-
-    // Human-in-the-loop: interrupt before publishing
-    interruptOn: {
-      publish_post: true,
-    },
   });
 }
 
