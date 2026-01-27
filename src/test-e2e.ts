@@ -15,13 +15,15 @@ import "dotenv/config";
 import { createDeepAgent, FilesystemBackend } from "deepagents";
 import { ChatOpenAI } from "@langchain/openai";
 import { resolve } from "path";
-import { readFileSync, existsSync, mkdirSync } from "fs";
-import YAML from "yaml";
+import { existsSync, mkdirSync } from "fs";
 
 // Tools
 import { webSearchTool } from "./tools/web-search.js";
 import { generateImageTool } from "./tools/generate-image.js";
 import { publishPostTool } from "./tools/publish-post.js";
+
+// SubAgents
+import { researcherSubAgent, editorSubAgent } from "./subagents/index.js";
 
 /**
  * Create LLM configured for DashScope (Qwen)
@@ -82,46 +84,6 @@ function checkEnvironment(): { valid: boolean; missing: string[] } {
  * Create agent for testing
  */
 function createTestAgent() {
-  // Load subagents
-  const content = readFileSync(resolve(PROJECT_ROOT, "subagents.yaml"), "utf-8");
-  const subagentConfig = YAML.parse(content);
-
-  const availableTools: Record<string, typeof webSearchTool> = {
-    web_search: webSearchTool,
-  };
-
-  // Helper to create LLM for subagents
-  const createSubagentLLM = (modelName?: string) => {
-    return new ChatOpenAI({
-      model: modelName || process.env.DEFAULT_LLM_MODEL || "qwen-max",
-      apiKey: process.env.DASHSCOPE_API_KEY,
-      configuration: {
-        baseURL:
-          process.env.DASHSCOPE_BASE_URL ||
-          "https://dashscope.aliyuncs.com/compatible-mode/v1",
-      },
-    });
-  };
-
-  const subagents = Object.entries(subagentConfig).map(([name, spec]) => {
-    const s = spec as {
-      description: string;
-      system_prompt: string;
-      model?: string;
-      tools?: string[];
-    };
-    return {
-      name,
-      description: s.description,
-      systemPrompt: s.system_prompt,
-      model: s.model ? createSubagentLLM(s.model) : undefined,
-      tools: s.tools
-        ?.map((t) => availableTools[t])
-        .filter((t): t is typeof webSearchTool => t !== undefined),
-    };
-  });
-
-  // Create LLM configured for DashScope
   const llm = createDashScopeLLM();
 
   return createDeepAgent({
@@ -129,7 +91,7 @@ function createTestAgent() {
     memory: ["./AGENTS.md"],
     skills: ["./skills/"],
     tools: [webSearchTool, generateImageTool, publishPostTool],
-    subagents,
+    subagents: [researcherSubAgent, editorSubAgent],
     backend: new FilesystemBackend({
       rootDir: resolve(PROJECT_ROOT, "output"),
       virtualMode: false,
