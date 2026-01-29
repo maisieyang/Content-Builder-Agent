@@ -5,6 +5,7 @@ This document describes the architecture of Content Builder Agent, a creative co
 ## Table of Contents
 
 - [Overview](#overview)
+- [Agent Selection Framework](#agent-selection-framework)
 - [Core Concepts](#core-concepts)
 - [System Architecture](#system-architecture)
 - [Component Details](#component-details)
@@ -26,6 +27,175 @@ Content Builder Agent is a multi-agent system designed to help individual creato
 | **Architecture** | Orchestrator + Specialized SubAgents |
 | **Configuration** | File-based (AGENTS.md, SKILL.md) |
 | **Output** | Filesystem-based content storage |
+
+---
+
+## Agent Selection Framework
+
+Before diving into implementation details, it's important to understand when and why to use different agent architectures.
+
+### The Two Dimensions of Agent Problems
+
+Agent applications can be categorized along two dimensions:
+
+1. **Path Certainty**: Is the solution path known in advance?
+2. **Complexity**: How many steps/capabilities are needed?
+
+```
+                        Path Certainty
+                    Known ◄─────────► Unknown
+                      │                  │
+                      ▼                  ▼
+               ┌─────────────┐    ┌─────────────┐
+               │  LangGraph  │    │   ReAct /   │
+               │  Flow-based │    │  deepAgent  │
+               │ Orchestration│    │ Autonomous  │
+               └─────────────┘    └─────────────┘
+```
+
+### When to Use Flow Orchestration (LangGraph)
+
+Use explicit flow orchestration when:
+- The process steps are **known and deterministic**
+- Compliance/audit requires **predictable paths**
+- You need **state machines** with explicit transitions
+- Multi-agent coordination follows **strict protocols**
+
+Examples: Approval workflows, ETL pipelines, form wizards
+
+### When to Use Autonomous Agents (ReAct / deepAgent)
+
+Use autonomous agents when:
+- The solution path is **uncertain or exploratory**
+- Tasks require **creativity and adaptation**
+- Problems need **trial-and-error** approaches
+- The agent must **discover** the path while executing
+
+Examples: Research, content creation, debugging, open-ended Q&A
+
+### The ReAct → deepAgent Spectrum
+
+**Key Insight**: For uncertain/exploratory scenarios, the spectrum from ReAct to deepAgent covers ALL complexity levels. You don't need a third paradigm.
+
+```
+Uncertainty Scenarios: Complete Coverage
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Simple                                                    Complex
+Creative                                                Exploratory
+Low complexity                                      High complexity
+─────────────────────────────────────────────────────────────────►
+
+    ReAct                         deepAgent
+      │                               │
+      │    ◄── No gap here ──►        │
+      │                               │
+      └───────────── Continuous ──────┘
+```
+
+**Why this works**:
+
+- **ReAct** = The minimal reasoning loop (Think → Act → Observe → Repeat)
+- **deepAgent** = ReAct + composable capability primitives
+
+```
+deepAgent = ReAct Core + Σ(Primitives)
+
+Where Primitives ∈ { memory, skills, files, subagents, plan, hitl, summary, tools, ... }
+```
+
+### deepAgent as a Superset of ReAct
+
+deepAgent provides composable primitives that you can mix and match:
+
+| Primitive | Purpose | When to Add |
+|-----------|---------|-------------|
+| `memory` | Persistent context (AGENTS.md) | Need consistent persona/voice |
+| `skills` | Workflow templates (SKILL.md) | Have repeatable patterns |
+| `subagents` | Specialized delegation | Tasks need expertise |
+| `files` | State persistence | Multi-step with artifacts |
+| `plan/todos` | Task decomposition | Complex multi-step tasks |
+| `hitl` | Human checkpoints | High-risk operations |
+| `summary` | Context compression | Long conversations |
+
+### Practical Selection Guide
+
+```
+                    ┌─────────────────┐
+                    │  Your Problem   │
+                    └────────┬────────┘
+                             │
+              ┌──────────────┴──────────────┐
+              ▼                              ▼
+      Is the path known?              Path uncertain?
+      (Deterministic flow)            (Needs exploration)
+              │                              │
+              ▼                              ▼
+     ┌────────────────┐            ┌────────────────┐
+     │   LangGraph    │            │ ReAct/deepAgent │
+     │ Flow Orchestration│          │   Autonomous   │
+     └────────────────┘            └────────┬───────┘
+                                            │
+                                    How complex?
+                                            │
+                        ┌───────────────────┼───────────────────┐
+                        ▼                   ▼                   ▼
+                     Simple              Medium              Complex
+                        │                   │                   │
+                        ▼                   ▼                   ▼
+                  ┌──────────┐        ┌──────────┐        ┌──────────┐
+                  │  ReAct   │        │deepAgent │        │deepAgent │
+                  │  (bare)  │        │ (partial)│        │  (full)  │
+                  └──────────┘        └──────────┘        └──────────┘
+                        │                   │                   │
+                        ▼                   ▼                   ▼
+                   No primitives      + memory           + memory
+                                      + skills           + skills
+                                      + subagents        + subagents
+                                                         + files
+                                                         + plan
+                                                         + hitl
+```
+
+### Example Configurations
+
+```typescript
+// Simple creative task - minimal config
+createDeepAgent({
+  model: llm,
+});
+
+// Content creation - this project's configuration
+createDeepAgent({
+  model: llm,
+  memory: ["./AGENTS.md"],
+  skills: ["./skills/"],
+  subagents: [researcherSubAgent, editorSubAgent],
+});
+
+// Deep research - more primitives
+createDeepAgent({
+  model: llm,
+  memory: ["./AGENTS.md"],
+  skills: ["./skills/"],
+  subagents: [researcherSubAgent, critiqueSubAgent],
+  // files managed via FilesystemBackend
+  // todos enabled by default
+});
+
+// Production with safeguards - full primitives
+createDeepAgent({
+  model: llm,
+  memory: ["./AGENTS.md"],
+  skills: ["./skills/"],
+  subagents: [...],
+  interruptOn: { publish: true, delete: true },  // HITL for risky ops
+});
+```
+
+### Summary
+
+> **For uncertain/exploratory scenarios, you don't need to choose between different agent architectures. Start with ReAct, progressively add deepAgent primitives as complexity grows. The framework naturally scales with your needs.**
 
 ---
 
