@@ -75,6 +75,6 @@ export function createContentBuilderAgent(): ReturnType<typeof createDeepAgent> 
   });
 }
 
-// Export the agent instance for langgraph.json
+// Export the agent instance for direct use
 export const agent: ReturnType<typeof createDeepAgent> =
   createContentBuilderAgent();

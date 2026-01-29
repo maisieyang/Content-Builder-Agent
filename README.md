@@ -36,9 +36,6 @@ cp .env.example .env
 # Run the agent
 npm run dev "Write a blog post about AI agents"
 npm run dev "Create a LinkedIn post about prompt engineering"
-
-# Or start LangGraph Studio
-npm run langgraph:dev
 ```
 
 ## Project Structure
@@ -60,8 +57,7 @@ content-builder-agent/
 │   │   └── publish-post.ts      # Social media publishing
 │   └── utils/
 │       └── env.ts               # Environment validation
-├── output/                      # Generated content
-└── langgraph.json               # LangGraph configuration
+└── output/                      # Generated content
 ```
 
 ## How It Works

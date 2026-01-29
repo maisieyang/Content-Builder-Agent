@@ -22,7 +22,7 @@ Content Builder Agent is a multi-agent system designed to help individual creato
 
 | Aspect | Description |
 |--------|-------------|
-| **Framework** | deepagents (LangGraph-based) |
+| **Framework** | deepagents |
 | **LLM Provider** | DashScope (Qwen models) |
 | **Architecture** | Orchestrator + Specialized SubAgents |
 | **Configuration** | File-based (AGENTS.md, SKILL.md) |
@@ -287,7 +287,7 @@ export const researcherSubAgent: SubAgent = {
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        User Interface                           │
-│                   (CLI / LangGraph Studio)                      │
+│                           (CLI)                                 │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -523,7 +523,7 @@ publishPostTool({
 
 ### State Management
 
-The agent uses LangGraph's state management:
+The agent uses deepagents' state management:
 
 ```typescript
 interface AgentState {
@@ -651,6 +651,5 @@ SubAgents (Specialists)
 ## References
 
 - [deepagents Documentation](https://github.com/anthropics/deepagentsjs)
-- [LangGraph Documentation](https://langchain-ai.github.io/langgraphjs/)
 - [DashScope API Reference](https://help.aliyun.com/zh/model-studio/)
 - [Tavily API Documentation](https://docs.tavily.com/)

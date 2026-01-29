@@ -16,14 +16,12 @@
     "test:e2e": "tsx src/test-e2e.ts",
     "test:e2e:blog": "tsx src/test-e2e.ts --scenario=blog --verbose",
     "test:e2e:linkedin": "tsx src/test-e2e.ts --scenario=linkedin --verbose",
-    "test:e2e:twitter": "tsx src/test-e2e.ts --scenario=twitter --verbose",
-    "langgraph:dev": "npx @langchain/langgraph-cli dev"
+    "test:e2e:twitter": "tsx src/test-e2e.ts --scenario=twitter --verbose"
   },
   "dependencies": {
     "@arcadeai/arcadejs": "^1.0.0",
     "@langchain/anthropic": "^1.3.11",
     "@langchain/core": "^1.1.16",
-    "@langchain/langgraph": "^1.1.1",
     "@langchain/openai": "^1.2.3",
     "@langchain/tavily": "^1.2.0",
     "cheerio": "^1.0.0",
@@ -34,7 +32,6 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
-    "@langchain/langgraph-cli": "^0.0.35",
     "@types/node": "^20.11.0",
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
